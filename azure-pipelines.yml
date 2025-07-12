@@ -1,0 +1,70 @@
+trigger:
+  branches:
+    include:
+      - main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  dockerImageName: flaskapp
+  dockerImageFile: flaskapp.tar
+
+stages:
+- stage: Build
+  jobs:
+  - job: BuildAndPackage
+    steps:
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '3.10'
+    
+    - script: |
+        echo "Installing dependencies"
+        pip install -r requirements.txt
+      displayName: 'Install dependencies'
+    
+    - task: Docker@2
+      inputs:
+        containerRegistry: 'Docker Hub (not needed here)'
+        repository: '$(dockerImageName)'
+        command: 'build'
+        Dockerfile: '**/Dockerfile'
+        tags: |
+          latest
+
+    - script: |
+        docker save $(dockerImageName):latest -o $(dockerImageFile)
+      displayName: 'Save Docker image as .tar'
+
+    - publish: $(dockerImageFile)
+      artifact: drop
+      displayName: 'Publish Docker Image Artifact'
+
+- stage: Deploy
+  dependsOn: Build
+  jobs:
+  - deployment: DeployToEC2
+    environment: 'production'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - download: current
+            artifact: drop
+
+          - task: CopyFilesOverSSH@0
+            inputs:
+              sshEndpoint: 'EC2-SSH'  # 👈 Must match your service connection name
+              sourceFolder: '$(Pipeline.Workspace)/drop'
+              contents: '$(dockerImageFile)'
+              targetFolder: '/home/ec2-user'
+
+          - task: SSH@0
+            inputs:
+              sshEndpoint: 'EC2-SSH'
+              runOptions: 'commands'
+              command: |
+                docker rm -f flaskapp || true
+                docker load -i $(dockerImageFile)
+                docker run -d -p 80:80 --name flaskapp flaskapp:latest
