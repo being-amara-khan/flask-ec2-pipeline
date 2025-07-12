@@ -3,68 +3,49 @@ trigger:
     include:
       - main
 
+variables:
+  dockerImageName: flask-ec2-app
+
 pool:
   vmImage: 'ubuntu-latest'
 
-variables:
-  dockerImageName: flaskapp
-  dockerImageFile: flaskapp.tar
+steps:
 
-stages:
-- stage: Build
-  jobs:
-  - job: BuildAndPackage
-    steps:
-    - task: UsePythonVersion@0
-      inputs:
-        versionSpec: '3.10'
-    
-    - script: |
-        echo "Installing dependencies"
-        pip install -r requirements.txt
-      displayName: 'Install dependencies'
-    
-    - task: Docker@2
-      inputs:
-        containerRegistry: 'Docker Hub (not needed here)'
-        repository: '$(dockerImageName)'
-        command: 'build'
-        Dockerfile: '**/Dockerfile'
-        tags: |
-          latest
+# Step 1: Checkout code
+- task: Checkout@1
 
-    - script: |
-        docker save $(dockerImageName):latest -o $(dockerImageFile)
-      displayName: 'Save Docker image as .tar'
+# Step 2: Build Docker image locally (no Docker Hub needed)
+- script: |
+    docker build -t $(dockerImageName):latest .
+  displayName: 'Build Docker Image'
 
-    - publish: $(dockerImageFile)
-      artifact: drop
-      displayName: 'Publish Docker Image Artifact'
+# Step 3: Save image as a tar file
+- script: |
+    docker save -o $(dockerImageName).tar $(dockerImageName):latest
+  displayName: 'Save Docker Image to tar'
 
-- stage: Deploy
-  dependsOn: Build
-  jobs:
-  - deployment: DeployToEC2
-    environment: 'production'
-    strategy:
-      runOnce:
-        deploy:
-          steps:
-          - download: current
-            artifact: drop
+# Step 4: Publish the image tar as a pipeline artifact
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: '$(dockerImageName).tar'
+    ArtifactName: 'docker-image'
+    publishLocation: 'Container'
 
-          - task: CopyFilesOverSSH@0
-            inputs:
-              sshEndpoint: 'EC2-SSH'  # 👈 Must match your service connection name
-              sourceFolder: '$(Pipeline.Workspace)/drop'
-              contents: '$(dockerImageFile)'
-              targetFolder: '/home/ec2-user'
+# Step 5: Deploy via SSH to EC2 (replace with your actual IP)
+- task: CopyFilesOverSSH@0
+  inputs:
+    sshEndpoint: 'EC2-SSH'   # Make sure your service connection is named exactly this
+    sourceFolder: '$(System.DefaultWorkingDirectory)'
+    contents: '**/*.tar'
+    targetFolder: '/home/ec2-user'
 
-          - task: SSH@0
-            inputs:
-              sshEndpoint: 'EC2-SSH'
-              runOptions: 'commands'
-              command: |
-                docker rm -f flaskapp || true
-                docker load -i $(dockerImageFile)
-                docker run -d -p 80:80 --name flaskapp flaskapp:latest
+- task: SSH@0
+  inputs:
+    sshEndpoint: 'EC2-SSH'
+    runOptions: 'commands'
+    commands: |
+      docker load -i /home/ec2-user/$(dockerImageName).tar
+      docker stop flask-container || true
+      docker rm flask-container || true
+      docker run -d -p 80:80 --name flask-container $(dockerImageName):latest
+    workingDirectory: '/home/ec2-user'
