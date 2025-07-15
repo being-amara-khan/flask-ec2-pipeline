@@ -1,11 +1,11 @@
 trigger:
-  - main
+- main
 
 pool:
   vmImage: ubuntu-latest
 
 variables:
-  imageName: flask-ec2-pipeline
+  imageName: flask-app
 
 stages:
 - stage: Build
@@ -18,10 +18,10 @@ stages:
       displayName: Build Docker Image
       inputs:
         command: build
-        dockerfile: $(Build.SourcesDirectory)/Dockerfile   # Explicit Dockerfile path
-        buildContext: $(Build.SourcesDirectory)            # Explicit context
-        tags: |
-          $(imageName):latest
+        repository: $(imageName)
+        tags: latest
+        Dockerfile: $(Build.SourcesDirectory)/Dockerfile
+        buildContext: $(Build.SourcesDirectory)
 
     - script: docker images
       displayName: List Docker Images
@@ -55,7 +55,5 @@ stages:
         inline: |
           cd /home/ec2-user
           docker load -i $(imageName).tar
-          docker rm -f $(imageName) || true
-          docker run -d --name $(imageName) -p 80:5000 $(imageName):latest
-
-
+          docker rm -f flask-app || true
+          docker run -d --name flask-app -p 80:5000 flask-app:latest
