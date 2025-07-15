@@ -1,0 +1,55 @@
+trigger:
+- main
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  imageName: flask-app
+
+stages:
+- stage: Build
+  jobs:
+  - job: BuildAndPackage
+    steps:
+    - checkout: self
+
+    - task: Docker@2
+      displayName: Build Docker Image
+      inputs:
+        command: build
+        Dockerfile: '**/Dockerfile'
+        tags: |
+          $(imageName):latest
+
+    - script: |
+        docker save $(imageName):latest -o $(Build.ArtifactStagingDirectory)/$(imageName).tar
+      displayName: Save Docker Image to .tar
+
+    - publish: $(Build.ArtifactStagingDirectory)/$(imageName).tar
+      artifact: image
+
+- stage: Deploy
+  dependsOn: Build
+  jobs:
+  - job: DeployToEC2
+    steps:
+    - download: current
+      artifact: image
+
+    - task: CopyFilesOverSSH@0
+      inputs:
+        sshEndpoint: EC2-SSH
+        sourceFolder: $(Pipeline.Workspace)/image
+        contents: '**'
+        targetFolder: /home/ec2-user
+
+    - task: SSH@0
+      inputs:
+        sshEndpoint: EC2-SSH
+        runOptions: inline
+        inline: |
+          cd /home/ec2-user
+          docker load -i $(imageName).tar
+          docker rm -f flask-app || true
+          docker run -d --name flask-app -p 80:5000 flask-app:latest
