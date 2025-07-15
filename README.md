@@ -111,8 +111,6 @@ ssh-keygen -t rsa -b 4096 -C "azure-deploy"
 #### 🏗️ Azure DevOps Org Setup  
 ![Azure DevOps Org Setup](5-Azure-DevOps-Org-Setup.jpeg)
 
-#### 📁 Azure DevOps Project Dashboard  
-![Azure DevOps Project Dashboard](7-Azure-DevOps-Project-Dashboard.jpeg)
 
 ---
 
