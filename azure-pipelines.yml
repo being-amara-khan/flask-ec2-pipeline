@@ -18,8 +18,8 @@ stages:
       displayName: Build Docker Image
       inputs:
         command: build
-        Dockerfile: 'Dockerfile'             # Because it's at the root level
-        buildContext: '.'                    # Use root as the context
+        dockerfile: $(Build.SourcesDirectory)/Dockerfile   # Explicit Dockerfile path
+        buildContext: $(Build.SourcesDirectory)            # Explicit context
         tags: |
           $(imageName):latest
 
@@ -57,4 +57,5 @@ stages:
           docker load -i $(imageName).tar
           docker rm -f $(imageName) || true
           docker run -d --name $(imageName) -p 80:5000 $(imageName):latest
+
 
