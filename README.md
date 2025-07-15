@@ -68,7 +68,7 @@ sudo systemctl enable docker
 sudo usermod -aG docker ec2-user
 ```
 
-📷 *Screenshot:* `2-Docker-Installed.png.jpeg`
+📷 *Screenshot:* `2-Docker-Installed.jpeg`
 
 ---
 
@@ -85,8 +85,8 @@ ssh-keygen -t rsa -b 4096 -C "azure-deploy"
 * Add the **public key** (`.pub`) into EC2’s `~/.ssh/authorized_keys`.
 
 📷 *Screenshot:*
-➡️ `3-Manual-SSH-Key-Attempt.png.jpeg`
-✅ `4-Manual-SSH-Key-Success.png.jpeg`
+➡️ `3-Manual-SSH-Key-Attempt.jpeg`
+✅ `4-Manual-SSH-Key-Success.jpeg`
 
 ---
 
@@ -140,7 +140,7 @@ Created a file called `azure-pipelines.yml` in root of repo.
   * Upload your **private key** (`.pem` or SSH key)
   * Name it `EC2-SSH`
 
-📷 *Screenshot:* `11-Service-Connection-SSH-Setup.png.jpeg`
+📷 *Screenshot:* `11-Service-Connection-SSH-Setup.jpeg`
 
 ---
 
@@ -153,7 +153,7 @@ Once all is set up, the pipeline will:
 3. Push to EC2 via SSH.
 4. Load Docker image on EC2 and run the container on port 80.
 
-📷 *Screenshot:* `12-Pipeline-Run-Dashboard.png.jpeg`
+📷 *Screenshot:* `12-Pipeline-Run-Dashboard.jpeg`
 
 ---
 
@@ -180,7 +180,6 @@ Once all is set up, the pipeline will:
 > This CI/CD pipeline was built with late-night coffee ☕, and 100% hustle 💪 by **Amara Khan**
 > \#TechByAmara
 
----
 
 
 
