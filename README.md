@@ -52,7 +52,8 @@ http://<ec2-public-ip>
 * Go to AWS Console and **create a new EC2 instance** using Amazon Linux 2023.
 * Open ports **22** and **80** in your **Security Group**.
 
-📷 *Screenshot:* `1-Create-an-Instance.jpeg`
+![Create an EC2 Instance](1-Create-an-Instance.jpeg)
+
 
 ---
 
@@ -68,7 +69,7 @@ sudo systemctl enable docker
 sudo usermod -aG docker ec2-user
 ```
 
-📷 *Screenshot:* `2-Docker-Installed.jpeg`
+![Docker Installed](2-Docker-Installed.jpeg)
 
 ---
 
@@ -84,9 +85,11 @@ ssh-keygen -t rsa -b 4096 -C "azure-deploy"
 
 * Add the **public key** (`.pub`) into EC2’s `~/.ssh/authorized_keys`.
 
-📷 *Screenshot:*
-➡️ `3-Manual-SSH-Key-Attempt.jpeg`
-✅ `4-Manual-SSH-Key-Success.jpeg`
+#### 🔐 Manual SSH Key Setup (Failed Attempt)  
+![Manual SSH Key Attempt](3-Manual-SSH-Key-Attempt.jpeg)
+
+#### ✅ Manual SSH Key Setup (Success)  
+![Manual SSH Key Success](4-Manual-SSH-Key-Success.jpeg)
 
 ---
 
@@ -96,8 +99,8 @@ ssh-keygen -t rsa -b 4096 -C "azure-deploy"
 
   > `"Hello from Flask on EC2 via Azure DevOps!"`
 * Pushed the complete code to GitHub from **GitHub Codespaces**.
-
-📷 *Screenshot:* `6-Flask-App-Running-On-GitHub-Codespace.jpeg`
+#### 💻 Flask App Running on GitHub Codespace  
+![Flask App Running on GitHub Codespace](6-Flask-App-Running-On-GitHub-Codespace.jpeg)
 
 ---
 
@@ -105,20 +108,19 @@ ssh-keygen -t rsa -b 4096 -C "azure-deploy"
 
 * Go to: [Azure DevOps Portal](https://dev.azure.com/)
 * Sign in and create a **new organization** and **project**.
+#### 🏗️ Azure DevOps Org Setup  
+![Azure DevOps Org Setup](5-Azure-DevOps-Org-Setup.jpeg)
 
-📷 *Screenshot:*
-➡️ `5-Azure-DevOps-Org-Setup.jpeg`
-➡️ `7-Azure-DevOps-Project-Dashboard.jpeg`
+#### 📁 Azure DevOps Project Dashboard  
+![Azure DevOps Project Dashboard](7-Azure-DevOps-Project-Dashboard.jpeg)
 
 ---
 
 ### 🔧 STEP 6: Commit Azure Pipeline File
 
 Created a file called `azure-pipelines.yml` in root of repo.
-
-📷 *Screenshot:* `8-Azure-Pipeline-File-Commit.png.jpeg`
-
----
+#### 📝 Azure Pipeline File Commit  
+![Azure Pipeline File Commit](8-Azure-Pipeline-File-Commit.jpeg)
 
 ### 📌 STEP 7: Create Azure Pipeline
 
@@ -126,7 +128,8 @@ Created a file called `azure-pipelines.yml` in root of repo.
 * Connect GitHub repo.
 * Choose existing YAML file (`azure-pipelines.yml`).
 
-📷 *Screenshot:* `9-azure-pipeline-creation.jpeg`
+#### 🔧 Azure Pipeline Creation  
+![Azure Pipeline Creation](9-azure-pipeline-creation.jpeg)
 
 ---
 
@@ -140,8 +143,8 @@ Created a file called `azure-pipelines.yml` in root of repo.
   * Upload your **private key** (`.pem` or SSH key)
   * Name it `EC2-SSH`
 
-📷 *Screenshot:* `11-Service-Connection-SSH-Setup.jpeg`
-
+#### 🔐 Azure DevOps SSH Service Connection  
+![Service Connection SSH Setup](11-Service-Connection-SSH-Setup.jpeg)
 ---
 
 ### 🧪 STEP 9: Trigger the Pipeline
@@ -153,7 +156,8 @@ Once all is set up, the pipeline will:
 3. Push to EC2 via SSH.
 4. Load Docker image on EC2 and run the container on port 80.
 
-📷 *Screenshot:* `12-Pipeline-Run-Dashboard.jpeg`
+#### 🚀 Azure DevOps Pipeline Run Dashboard  
+![Pipeline Run Dashboard](12-Pipeline-Run-Dashboard.jpeg)
 
 ---
 
@@ -161,9 +165,8 @@ Once all is set up, the pipeline will:
 
 * Your Flask app is now running live from **EC2** on **port 80**.
 * Can be accessed via EC2’s public IP.
-
-📷 *Screenshot:* `app_deployed.jpeg`
-
+#### ✅ App Deployed on EC2  
+![App Deployed](app_deployed.jpeg)
 ---
 
 ## 💡 Key Highlights
