@@ -11,6 +11,7 @@ stages:
 - stage: Build
   jobs:
   - job: BuildAndPackage
+    displayName: Build and Package Docker Image
     steps:
     - checkout: self
 
@@ -24,24 +25,27 @@ stages:
         buildContext: $(Build.SourcesDirectory)
 
     - script: docker images
-      displayName: List Docker Images
+      displayName: ✅ Sanity Check: List Docker Images
 
     - script: |
         docker save $(imageName):latest -o $(Build.ArtifactStagingDirectory)/$(imageName).tar
-      displayName: Save Docker Image to .tar
+      displayName: 📦 Save Docker Image to .tar
 
     - publish: $(Build.ArtifactStagingDirectory)/$(imageName).tar
       artifact: image
 
 - stage: Deploy
+  displayName: Deploy to EC2 Instance
   dependsOn: Build
   jobs:
   - job: DeployToEC2
+    displayName: Deploy Docker Image to EC2
     steps:
     - download: current
       artifact: image
 
     - task: CopyFilesOverSSH@0
+      displayName: 🚀 Copy Docker Image to EC2
       inputs:
         sshEndpoint: EC2-SSH
         sourceFolder: $(Pipeline.Workspace)/image
@@ -49,6 +53,7 @@ stages:
         targetFolder: /home/ec2-user
 
     - task: SSH@0
+      displayName: 🔧 Load & Run Docker Image on EC2
       inputs:
         sshEndpoint: EC2-SSH
         runOptions: inline
